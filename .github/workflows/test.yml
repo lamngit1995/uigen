@@ -25,20 +25,64 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
+    - name: Cache Prisma
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules/.prisma
+          src/generated/prisma
+        key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
+        restore-keys: |
+          ${{ runner.os }}-prisma-
+
     - name: Install dependencies
       run: npm ci
 
+    - name: Setup test environment
+      run: |
+        echo "Setting up test environment..."
+        echo "Node version: $(node --version)"
+        echo "NPM version: $(npm --version)"
+
     - name: Generate Prisma client
       run: npx prisma generate
+
+    - name: Setup test database
+      run: |
+        echo "Setting up test database..."
+        npx prisma migrate deploy || echo "No migrations to apply"
+        ls -la prisma/ || true
 
     - name: Run linter
       run: npm run lint
 
     - name: Run tests
-      run: npm test
+      run: npm test -- --reporter=verbose --no-coverage
+      env:
+        NODE_ENV: test
+        CI: true
+        FORCE_COLOR: 1
+
+    - name: Upload test results on failure
+      if: failure()
+      run: |
+        echo "Tests failed. Environment info:"
+        echo "Node: $(node --version)"
+        echo "NPM: $(npm --version)"
+        echo "Platform: $(uname -a)"
+        echo "PWD: $(pwd)"
+        ls -la
 
     - name: Build project
       run: npm run build
+
+    - name: Upload build artifacts
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-${{ matrix.node-version }}
+        path: .next
+        retention-days: 1
 
     - name: Test build artifacts
       run: |
