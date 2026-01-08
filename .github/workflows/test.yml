@@ -57,7 +57,7 @@ jobs:
       run: npm run lint
 
     - name: Run tests
-      run: npm test -- --reporter=verbose --no-coverage
+      run: npm test -- --reporter=verbose --no-coverage --run
       env:
         NODE_ENV: test
         CI: true

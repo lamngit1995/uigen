@@ -4,15 +4,20 @@
  */
 
 // Set test environment variables
-process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test-secret-key-for-testing';
+if (!process.env.NODE_ENV) {
+  Object.defineProperty(process.env, 'NODE_ENV', { value: 'test', writable: true });
+}
+
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'test-secret-key-for-testing';
+}
 
 // Mock environment variables for tests if not set
 if (!process.env.ANTHROPIC_API_KEY) {
   process.env.ANTHROPIC_API_KEY = '';
 }
 
-// Increase timeout for CI environments
+// Log CI environment
 if (process.env.CI) {
   console.log('Running in CI environment');
 }
