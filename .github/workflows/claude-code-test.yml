@@ -1,0 +1,70 @@
+name: Claude Code Integration Test
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:  # Manual trigger for testing
+
+jobs:
+  integration-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Display repository info
+      run: |
+        echo "🤖 Claude Code Integration Test"
+        echo "================================"
+        echo ""
+        echo "Repository: ${{ github.repository }}"
+        echo "Owner: ${{ github.repository_owner }}"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "SHA: ${{ github.sha }}"
+        echo ""
+        echo "Event Details:"
+        echo "  Type: ${{ github.event_name }}"
+        echo "  Actor: ${{ github.actor }}"
+        echo ""
+
+    - name: Check for CLAUDE.md
+      run: |
+        if [ -f "CLAUDE.md" ]; then
+          echo "✅ CLAUDE.md found!"
+          echo "📄 First few lines:"
+          head -10 CLAUDE.md
+        else
+          echo "⚠️  CLAUDE.md not found"
+        fi
+
+    - name: Verify project structure
+      run: |
+        echo "📁 Key directories:"
+        echo "  src/: $([ -d src ] && echo '✅' || echo '❌')"
+        echo "  .github/: $([ -d .github ] && echo '✅' || echo '❌')"
+        echo "  prisma/: $([ -d prisma ] && echo '✅' || echo '❌')"
+        echo ""
+        echo "📄 Key files:"
+        echo "  package.json: $([ -f package.json ] && echo '✅' || echo '❌')"
+        echo "  README.md: $([ -f README.md ] && echo '✅' || echo '❌')"
+        echo "  tsconfig.json: $([ -f tsconfig.json ] && echo '✅' || echo '❌')"
+
+    - name: Installation success message
+      run: |
+        echo ""
+        echo "🎉 GitHub Actions Integration Test Complete!"
+        echo "==========================================="
+        echo ""
+        echo "✅ This workflow ran successfully, which means:"
+        echo "   1. GitHub Actions is properly configured"
+        echo "   2. The repository is accessible"
+        echo "   3. Workflows can checkout and read the code"
+        echo ""
+        echo "If you see this message, the basic integration is working!"
+        echo ""
+        echo "For Claude Code App verification, check:"
+        echo "  → https://github.com/settings/installations"
+        echo "  → Look for 'Claude Code Action' with access to this repo"
